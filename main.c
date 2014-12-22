@@ -11,7 +11,7 @@ struct Naglowek
     int szerokosc_bajty;
 };
 
-void pokoloruj(struct Naglowek *, struct Naglowek *, char *, char *, char *);
+int pokoloruj(struct Naglowek *, struct Naglowek *, char *, char *, char *);
 
 int main()
 {
@@ -49,10 +49,15 @@ int main()
         exit(1);
     }
     rewind(plik);
-    char tab[one.rozmiar];
-    fread(tab, sizeof(char), one.rozmiar, plik);
-    fwrite(tab, sizeof(char), one.rozmiar, bufor);
 
+
+    char t[one.rozmiar];
+    fread(t, sizeof(char), one.rozmiar, plik);
+    fwrite(t, sizeof(char), one.rozmiar, bufor);
+	rewind(plik);
+	char tab[one.rozmiar_tablicy];
+	fseek(plik, (long)one.offset, SEEK_SET);
+	fread(tab, sizeof(char), one.rozmiar_tablicy, plik);	
      fclose(plik);
      fclose(bufor);
 
@@ -72,9 +77,11 @@ int main()
     fseek(plik, 8L, SEEK_CUR);
     fread(&(two.rozmiar_tablicy), sizeof(int),1,plik);
     two.szerokosc_bajty = two.rozmiar_tablicy/two.wysokosc;
+
+
     char tab2[two.rozmiar_tablicy];
     fseek(plik, (long) two.offset, SEEK_SET);
-    fread(tab1, sizeof(char),two.rozmiar_tablicy,plik);
+    fread(tab2, sizeof(char),two.rozmiar_tablicy,plik);
     fclose(plik);
 
  /*    if((plik = fopen("test.bmp", "a+b")) == NULL)
@@ -86,15 +93,17 @@ int main()
     fwrite(tab1, sizeof(char), one.rozmiar_tablicy, plik);
     fclose(plik); */
 
-	pokoloruj(&one, &two, tab1,tab2, tab);
+	int z = pokoloruj(&one, &two, tab1,tab2, tab);
+	printf("Zmienna zwrocona: %d\n", z);
 
 	if((bufor = fopen("bufor.bmp", "rb+")) == NULL)
     	{
     	    fprintf(stderr, "Blad otwarcia pliku\n");
     	    exit(1);
     	}
+	 
 	 fseek(bufor, (long) one.offset, SEEK_SET);
-	 //fwrite(tab, sizeof(char), one.rozmiar_tablicy, bufor);
+	 fwrite(tab, sizeof(char), one.rozmiar_tablicy, bufor);
 	 fclose(bufor);
 	
     printf("Rozmiar pliku %d, offset %d, szerokosc %d, wysokosc %d, rozmiar tablicy %d, bajty %d\n\n", one.rozmiar, one.offset, one.szerokosc
