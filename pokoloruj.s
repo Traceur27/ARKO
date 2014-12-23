@@ -2,8 +2,8 @@
     global pokoloruj
 
 pokoloruj:
-    push ebp
-    mov ebp, esp
+        push ebp
+        mov ebp, esp
 	sub esp, 20
 	
 	push edi
@@ -44,8 +44,8 @@ pokoloruj:
 	mov edx, eax               ;liczba bajtow do punktu startowego juz jest w edx
     
 	
-    mov esi, [ebp + 32]		   ;adres na tablice po ktorej mam pisac
-	add esi, edx			   ;przesuniecie sie o odpowiednia liczbe bajtow
+        mov esi, [ebp + 32]	   ;adres na tablice po ktorej mam pisac
+	add esi, edx		   ;przesuniecie sie o odpowiednia liczbe bajtow
 	mov eax, [ebp + 24]        ;adres pierwszej tablicy
 	add eax, edx               ;przesuniecie na odpowiedni pixel
 	mov edx, eax	           ;zapamietanie w edx
@@ -55,11 +55,11 @@ pokoloruj:
 
 	loop:
 	mov edi, [ebp - 20]     
-	cmp edi, [ebp - 4]	       ;czy juz caly maly obrazek
+	cmp edi, [ebp - 4]	   ;czy juz caly maly obrazek
 	je end
 
 	mov edi, [ebp - 16]
-    cmp [ebp - 8], edi         ;czy linijka sie skonczyla
+        cmp [ebp - 8], edi         ;czy linijka sie skonczyla
 	je next
 
 	mov bl, [edx]              ;pobranie wartosci jednego koloru
@@ -114,6 +114,6 @@ pokoloruj:
 		
 	mov esp, ebp               ;dealokacja zmiennych lokalnych
 
-    pop ebp
-    ret
+        pop ebp
+        ret
 
