@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#define wysokoscStartowa 25
+#define szerokoscStartowa 25
 
 struct Naglowek
 {
@@ -11,16 +13,14 @@ struct Naglowek
     int szerokosc_bajty;
 };
 
-int pokoloruj(struct Naglowek *, struct Naglowek *, char *, char *, char *);
+int pokoloruj(int xStartowe, int yStartowe, struct Naglowek*, struct Naglowek*, char *pixeleDuzego, char *pixeleMalego, char *tablicaDoPisania);
 
 int main()
 {
     struct Naglowek one, two;
-    const char * nazwa1 = "abc.bmp";
-    const char * nazwa2 = "cba.bmp";
+    const char * nazwa1 = "duzy.bmp";
+    const char * nazwa2 = "maly.bmp";
     FILE * plik, *bufor;
-    int a;
-    //char b;
 
     //usupelnienie naglowka
     if((plik = fopen(nazwa1, "rb")) == NULL)
@@ -38,12 +38,13 @@ int main()
     fseek(plik, 8L, SEEK_CUR);
     fread(&(one.rozmiar_tablicy), sizeof(int),1,plik);
     one.szerokosc_bajty = one.rozmiar_tablicy/one.wysokosc;
-    char tab1[one.rozmiar_tablicy];
-    fseek(plik, (long) one.offset, SEEK_SET);
-    fread(tab1, sizeof(char),one.rozmiar_tablicy,plik);
+
+    char duzySamePixele[one.rozmiar_tablicy]; //tablica w ktorej bede przechowywal same pixele z duzego obrazka
+    fseek(plik, (long) one.offset, SEEK_SET); //przsun sie o offset
+    fread(duzySamePixele, sizeof(char),one.rozmiar_tablicy,plik); //przepisz wszystko do konca
 
 
-    if((bufor = fopen("bufor.bmp", "wb")) == NULL)
+    if((bufor = fopen("wynik.bmp", "wb")) == NULL)
     {
         fprintf(stderr, "Blad otwarcia pliku\n");
         exit(1);
@@ -51,13 +52,14 @@ int main()
     rewind(plik);
 
 
-    char t[one.rozmiar];
-    fread(t, sizeof(char), one.rozmiar, plik);
-    fwrite(t, sizeof(char), one.rozmiar, bufor);
+    char duzyKopia[one.rozmiar]; //tablica na kopie duzego obrazka wejsciowego
+    fread(duzyKopia, sizeof(char), one.rozmiar, plik);  //spisuje wartosci
+    fwrite(duzyKopia, sizeof(char), one.rozmiar, bufor);  //i od razu tworze plik bmp bedacy moim buforem
 	rewind(plik);
-	char tab[one.rozmiar_tablicy];
+
+	char tablicaDoPisania[one.rozmiar_tablicy]; //tablica dla samych pixeli 
 	fseek(plik, (long)one.offset, SEEK_SET);
-	fread(tab, sizeof(char), one.rozmiar_tablicy, plik);	
+	fread(tablicaDoPisania, sizeof(char), one.rozmiar_tablicy, plik); 	
      fclose(plik);
      fclose(bufor);
 
@@ -79,31 +81,23 @@ int main()
     two.szerokosc_bajty = two.rozmiar_tablicy/two.wysokosc;
 
 
-    char tab2[two.rozmiar_tablicy];
+    char malySamePixele[two.rozmiar_tablicy]; //tablica na pixele z malego obrazka
     fseek(plik, (long) two.offset, SEEK_SET);
-    fread(tab2, sizeof(char),two.rozmiar_tablicy,plik);
+    fread(malySamePixele, sizeof(char),two.rozmiar_tablicy,plik);
     fclose(plik);
 
- /*    if((plik = fopen("test.bmp", "a+b")) == NULL)
-    {
-        fprintf(stderr, "Blad otwarcia pliku\n");
-        exit(1);
-    }
-    fseek(plik, (long) one.offset,SEEK_SET );
-    fwrite(tab1, sizeof(char), one.rozmiar_tablicy, plik);
-    fclose(plik); */
 
-	int z = pokoloruj(&one, &two, tab1,tab2, tab);
+	int z = pokoloruj(szerokoscStartowa, wysokoscStartowa,&one, &two, duzySamePixele,malySamePixele, tablicaDoPisania);
 	printf("Zmienna zwrocona: %d\n", z);
 
-	if((bufor = fopen("bufor.bmp", "rb+")) == NULL)
+	if((bufor = fopen("wynik.bmp", "rb+")) == NULL)
     	{
     	    fprintf(stderr, "Blad otwarcia pliku\n");
     	    exit(1);
     	}
 	 
 	 fseek(bufor, (long) one.offset, SEEK_SET);
-	 fwrite(tab, sizeof(char), one.rozmiar_tablicy, bufor);
+	 fwrite(tablicaDoPisania, sizeof(char), one.rozmiar_tablicy, bufor);
 	 fclose(bufor);
 	
     printf("Rozmiar pliku %d, offset %d, szerokosc %d, wysokosc %d, rozmiar tablicy %d, bajty %d\n\n", one.rozmiar, one.offset, one.szerokosc
