@@ -86,6 +86,11 @@ int main()
     fread(malySamePixele, sizeof(char),two.rozmiar_tablicy,plik);
     fclose(plik);
 
+	if( ((szerokoscStartowa + two.szerokosc) > one.szerokosc) || ((wysokoscStartowa + two.wysokosc) > one.wysokosc) )
+	{
+		printf("Blad. Maly obrazek wychodzi poza obszar duzego\n");
+		exit(1);
+	}	
 
 	int z = pokoloruj(szerokoscStartowa, wysokoscStartowa,&one, &two, duzySamePixele,malySamePixele, tablicaDoPisania);
 	printf("Zmienna zwrocona: %d\n", z);
@@ -102,8 +107,61 @@ int main()
 	
     printf("Rozmiar pliku %d, offset %d, szerokosc %d, wysokosc %d, rozmiar tablicy %d, bajty %d\n\n", one.rozmiar, one.offset, one.szerokosc
            ,one.wysokosc, one.rozmiar_tablicy, one.szerokosc_bajty);
-    printf("Rozmiar pliku 2 %d, offset %d, szerokosc %d, wysokosc %d, rozmiar tablicy %d, bajty %d", two.rozmiar, two.offset, two.szerokosc
+    printf("Rozmiar pliku 2 %d, offset %d, szerokosc %d, wysokosc %d, rozmiar tablicy %d, bajty %d\n\n", two.rozmiar, two.offset, two.szerokosc
            ,two.wysokosc, two.rozmiar_tablicy, two.szerokosc_bajty);
+
+	char a = getchar();
+	getchar();
+	int wysokosc = wysokoscStartowa;
+	int szerokosc  = szerokoscStartowa;
+
+	while(a != 'k')
+	{
+		int i;
+		for(i = 0; i<one.rozmiar_tablicy;++i)
+			tablicaDoPisania[i] = duzySamePixele[i];
+
+			switch(a)
+			{
+			case 'a':
+				szerokosc -=5;
+				if(szerokosc < 0)
+					szerokosc +=5;
+				pokoloruj(szerokosc, wysokosc,&one, &two, duzySamePixele,malySamePixele, tablicaDoPisania);
+				break;
+
+			case 'w':
+				wysokosc +=5;
+				if((wysokosc + two.wysokosc) > one.wysokosc)
+					wysokosc -=5;
+				pokoloruj(szerokosc, wysokosc,&one, &two, duzySamePixele,malySamePixele, tablicaDoPisania);
+				break;
+
+			case 'd':
+				szerokosc +=5;
+				if((szerokosc + two.szerokosc) > one.szerokosc)
+					szerokosc -=5;
+				pokoloruj(szerokosc, wysokosc,&one, &two, duzySamePixele,malySamePixele, tablicaDoPisania);
+				break;
+
+			case 's': 
+				wysokosc -=5;
+				if(wysokosc < 0)
+					wysokosc +=5;
+				pokoloruj(szerokosc, wysokosc,&one, &two, duzySamePixele,malySamePixele, tablicaDoPisania);
+				break;
+			}
+		 if((bufor = fopen("wynik.bmp", "rb+")) == NULL)
+		 {
+			  fprintf(stderr, "Blad otwarcia pliku\n");
+			  exit(1);
+		 }
+		 a = getchar();
+		 getchar();
+	}
+		 fseek(bufor, (long) one.offset, SEEK_SET);
+		 fwrite(tablicaDoPisania, sizeof(char), one.rozmiar_tablicy, bufor);
+		 fclose(bufor);
 
 return 0;
 }

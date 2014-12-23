@@ -62,13 +62,13 @@ pokoloruj:
     cmp [ebp - 8], edi         ;czy linijka sie skonczyla
 	je next
 
-	mov bl, [edx]
-	mov cl, [eax]
-	shr bl, 1
+	mov bl, [edx]              ;pobranie wartosci jednego koloru
+	mov cl, [eax]              ;oraz drugiego
+	shr bl, 1                  ;odpowiednia czesc pierwszego
 	shr cl, 1
-	add bl, cl
-	mov [esi], bl 
-	mov bl, [edx+1]
+	add bl, cl                 ;suma tych czesci
+	mov [esi], bl              ;wrzucam do tablicy wynikowej
+	mov bl, [edx+1]            ;i powtarzam jeszcze dwa razy, poniewaz przesuwam sie po pixelach(jeden to trzy bajty)
 	mov cl, [eax+1]
 	shr bl, 1
 	shr cl, 1
@@ -93,11 +93,17 @@ pokoloruj:
 	next:
 	mov edi, [ebp - 16]
 	imul edi, 3                ;liczba pixeli w wierszu, ktore zostaly spisane zamieniana na bajty
+	push edi
 	sub edx, edi               ;cofniecie edx na poczatek wiersza
 	add edx, [ebp - 12]        ;i przeskoczenie jeden wiersz do gory
 	sub esi, edi
 	add esi, [ebp - 12]        ;to samo z esi
 	mov dword [ebp - 16], 0    ;licznik pixeli w wierszu od poczatku
+	mov edi, [ebp + 20]        ;trzeba jeszcze uwzglednic padding
+	mov edi, [edi + 20]        ;pobieram szerokosc malego w bajtach
+	sub edi, [ebp - 36]        ;odejmuje od policzonej szerokosci w bajtach
+	add eax, edi               ;i przesuwam wskaznik z malego obrazka
+	pop edi                    ;to juz nie potrzebne
 	jmp loop
 
 	end:
