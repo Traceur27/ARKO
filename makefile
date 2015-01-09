@@ -1,10 +1,18 @@
+CFLAGS=
+LDFLAGS=-L/usr/lib -lallegro -lallegro_image
+INCLUDE=-I. -I/usr/include/allegro5
+
+OBJS=main.o
+OBJ=pokoloruj.o
+
 all: out
-out: main.o pokoloruj.o
-	cc -m32 -o $@ $^
+
+clean:
+		rm -rf *.o main pokoloruj
+
+out: $(OBJS) $(OBJ)
+		cc -o $@ $^ $(INCLUDE) $(CFLAGS) $(LDFLAGS)
 main.o: main.c
-	cc -m32 -c $^
+		cc -c $^
 %.o: %.s
 	nasm -f elf $<
-clear:
-	rm -rf pokoloruj.o main.o
-.PHONY: all clear
