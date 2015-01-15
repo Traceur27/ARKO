@@ -216,7 +216,7 @@ int main()
          }
       }
  
-      if(redraw && al_is_event_queue_empty(event_queue)) {
+      if(redraw){
          redraw = false;
 			int i = 0;
 			for(;i<one.rozmiar_tablicy;++i)
@@ -234,6 +234,7 @@ int main()
 		 fclose(bufor);
 		
 		image = al_load_bitmap("wynik.bmp");
+		al_set_target_bitmap(al_get_backbuffer(display));
 		al_draw_bitmap(image, 0, 0, 0);
          al_flip_display();
       }
