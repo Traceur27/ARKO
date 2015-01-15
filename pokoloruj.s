@@ -1,10 +1,14 @@
+	global pokoloruj
+
+	section .data
+	x: dd 0.5      ;declare double word(4 bajty)
+
     section .text
-    global pokoloruj
 
 pokoloruj:
-        push ebp
-        mov ebp, esp
-	sub esp, 20
+    push ebp
+    mov ebp, esp
+	sub esp, 28
 	
 	push edi
 	push esi
@@ -44,43 +48,92 @@ pokoloruj:
 	mov edx, eax               ;liczba bajtow do punktu startowego juz jest w edx
     
 	
-        mov esi, [ebp + 32]	   ;adres na tablice po ktorej mam pisac
-	add esi, edx		   ;przesuniecie sie o odpowiednia liczbe bajtow
+    mov esi, [ebp + 32]	       ;adres na tablice po ktorej mam pisac
+	add esi, edx		       ;przesuniecie sie o odpowiednia liczbe bajtow
 	mov eax, [ebp + 24]        ;adres pierwszej tablicy
 	add eax, edx               ;przesuniecie na odpowiedni pixel
 	mov edx, eax	           ;zapamietanie w edx
 	mov eax, [ebp + 28]        ;adres na tablice z malym obrazkiem
-	
-	
+	fld dword [x]              ;wspolczynnik przezroczystosci
+	fld1                       ;1 w st0, x w st1
+	fsub st0, st1              ;1-x w st0, x w st1
+
 
 	loop:
 	mov edi, [ebp - 20]     
-	cmp edi, [ebp - 4]	   ;czy juz caly maly obrazek
+	cmp edi, [ebp - 4]	       ;czy juz caly maly obrazek
 	je end
 
 	mov edi, [ebp - 16]
-        cmp [ebp - 8], edi         ;czy linijka sie skonczyla
+    cmp [ebp - 8], edi         ;czy linijka sie skonczyla
 	je next
+
+	;B
+	xor ebx, ebx			   ;wyzerowanie rejestrow
+	xor ecx, ecx
 
 	mov bl, [edx]              ;pobranie wartosci jednego koloru
 	mov cl, [eax]              ;oraz drugiego
-	shr bl, 1                  ;odpowiednia czesc pierwszego
-	shr cl, 1
-	add bl, cl                 ;suma tych czesci
-	mov [esi], bl              ;wrzucam do tablicy wynikowej
-	mov bl, [edx+1]            ;i powtarzam jeszcze dwa razy, poniewaz przesuwam sie po pixelach(jeden to trzy bajty)
-	mov cl, [eax+1]
-	shr bl, 1
-	shr cl, 1
-	add bl, cl  
-	mov [esi + 1], bl
-	mov bl, [edx+2]
-	mov cl, [eax+2]
-	shr bl, 1
-	shr cl, 1
-	add bl, cl
-	mov [esi + 2], bl
+	mov [ebp - 24], dword ebx
+	mov [ebp - 28], dword ecx
 
+	fild dword [ebp - 24]      ;kolor jednego w st0, st1 1-x i x w st2
+	fild dword [ebp - 28]      ;kolor 2 w st0, kolor 1 w st1, 1-x w st2 i x w st3 
+	fmul st0, st2              ;kolor2 * 1-x
+	fistp dword [ebp - 24]     ;do pamieci; kolor1 w st0, 1-x w st1 i x w st2
+	mov ecx, dword [ebp - 24]  ;do ecx
+
+
+	fmul st0, st2              ;kolor1 * x
+	fistp dword [ebp - 28]     ;drugie slowo do pamieci
+	add ecx, dword[ebp - 28]
+	mov [esi], cl              ;wrzucam do tablicy wynikowej
+	
+	
+	;G	
+	xor ebx, ebx			   ;wyzerowanie rejestrow
+	xor ecx, ecx
+
+	mov bl, [edx+1]              ;pobranie wartosci jednego koloru
+	mov cl, [eax+1]              ;oraz drugiego
+	mov [ebp - 24], dword ebx
+	mov [ebp - 28], dword ecx
+
+
+	fild dword [ebp - 24]      ;kolor jednego w st0, st1 1-x i x w st2
+	fild dword [ebp - 28]      ;kolor 2 w st0, kolor 1 w st1, 1-x w st2 i x w st3 
+	fmul st0, st2              ;kolor2 * 1-x
+	fistp dword [ebp - 24]     ;do pamieci; kolor1 w st0, 1-x w st1 i x w st2
+	mov ecx, dword [ebp - 24]  ;do ebx
+
+
+	fmul st0, st2              ;kolor1 * x
+	fistp dword [ebp - 28]     ;drugie slowo do pamieci
+	add ecx, dword[ebp - 28]
+	mov [esi + 1], cl
+
+
+	;R
+	xor ebx, ebx			   ;wyzerowanie rejestrow
+	xor ecx, ecx
+
+	mov bl, [edx+2]            ;pobranie wartosci jednego koloru
+	mov cl, [eax+2]            ;oraz drugiego
+	mov [ebp - 24], dword ebx
+	mov [ebp - 28], dword ecx
+
+
+	fild dword [ebp - 24]      ;kolor jednego w st0, st1 1-x i x w st2
+	fild dword [ebp - 28]      ;kolor 2 w st0, kolor 1 w st1, 1-x w st2 i x w st3 
+	fmul st0, st2              ;kolor2 * 1-x
+	fistp dword [ebp - 24]     ;do pamieci; kolor1 w st0, 1-x w st1 i x w st2
+	mov ecx, dword [ebp - 24]  ;do ebx
+
+
+	fmul st0, st2              ;kolor1 * x
+	fistp dword [ebp - 28]     ;drugie slowo do pamieci
+	add ecx, dword[ebp - 28]
+	mov [esi + 2], cl
 	
 	add esi, 3                 ;przesuniecie wskaznikow na nastepne pixele
 	add edx, 3
@@ -101,7 +154,7 @@ pokoloruj:
 	mov dword [ebp - 16], 0    ;licznik pixeli w wierszu od poczatku
 	mov edi, [ebp + 20]        ;trzeba jeszcze uwzglednic padding
 	mov edi, [edi + 20]        ;pobieram szerokosc malego w bajtach
-	sub edi, [ebp - 36]        ;odejmuje od policzonej szerokosci w bajtach
+	sub edi, [ebp - 44]        ;odejmuje od policzonej szerokosci w bajtach
 	add eax, edi               ;i przesuwam wskaznik z malego obrazka
 	pop edi                    ;to juz nie potrzebne
 	jmp loop
@@ -114,6 +167,6 @@ pokoloruj:
 		
 	mov esp, ebp               ;dealokacja zmiennych lokalnych
 
-        pop ebp
-        ret
+    pop ebp
+    ret
 
