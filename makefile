@@ -2,17 +2,17 @@ CFLAGS=
 LDFLAGS=-L/usr/lib -lallegro -lallegro_image
 INCLUDE=-I. -I/usr/include/allegro5
 
-OBJS=main.o
-OBJ=pokoloruj.o
+MAIN=main.o
+FUNC=blend.o
 
-all: out
+all: blend
 
 clean:
 		rm -rf *.o main pokoloruj
 
-out: $(OBJS) $(OBJ)
+blend: $(FUNC) $(MAIN)
 		cc -o $@ $^ $(INCLUDE) $(CFLAGS) $(LDFLAGS)
 main.o: main.c
 		cc -c $^
 %.o: %.s
-	nasm -f elf $<
+	nasm -f elf64 $<

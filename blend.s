@@ -1,11 +1,11 @@
-	global pokoloruj
+global blend
 
-	section .data
-	x: dd 0.5                  ;declare double word(4 bajty)
+    section .data
+    x: dd 0.5                      ;declare double word(4 bajty)
 
-    section .text
+section .text
 
-pokoloruj:
+blend:
     push rbp
     mov rbp, rsp
 	sub rsp, 8
@@ -42,15 +42,15 @@ pokoloruj:
 
 
 	loop:     
-	cmp r12d, ebx     	       ;czy juz caly maly obrazek
+	cmp r12d, ebx     	   ;czy juz caly maly obrazek
 	je end
 
-    cmp r13d, [rcx + 8]        ;czy linijka sie skonczyla
+    cmp r13d, [rcx + 8]            ;czy linijka sie skonczyla
 	je next
 
 
 	;B
-	xor r14, r14			   ;wyzerowanie rejestrow
+	xor r14, r14		   ;wyzerowanie rejestrow
 	xor r15, r15
 
 	mov r14b, [r8]             ;pobranie wartosci jednego koloru
@@ -75,7 +75,7 @@ pokoloruj:
 
 
 	;G	
-	xor r14, r14			   ;wyzerowanie rejestrow
+	xor r14, r14		   ;wyzerowanie rejestrow
 	xor r15, r15
 
 	mov r14b, [r8+1]           ;pobranie wartosci jednego koloru
@@ -100,7 +100,7 @@ pokoloruj:
 
 
 	;R
-	xor r14, r14			   ;wyzerowanie rejestrow
+	xor r14, r14		   ;wyzerowanie rejestrow
 	xor r15, r15
 
 	mov r14b, [r8+2]           ;pobranie wartosci jednego koloru
@@ -132,7 +132,7 @@ pokoloruj:
 	
    	
 	next:
-	imul r13d, 3                ;liczba pixeli w wierszu, ktore zostaly spisane zamieniana na bajty
+	imul r13d, 3               ;liczba pixeli w wierszu, ktore zostaly spisane zamieniana na bajty
 	sub r8, r13                ;cofniecie edx na poczatek wiersza
 	xor r15, r15
 	mov r15d, dword[rdx + 20]
@@ -141,7 +141,7 @@ pokoloruj:
 	add r10, r15               ;to samo z r10
 	xor r11, r11
 	mov r11d, dword[rcx + 20]  ;trzeba jeszcze uwzglednic padding - pobieram szerokosc malego w bajtach
-	sub r11d, r13d               ;odejmuje od policzonej szerokosci w bajtach
+	sub r11d, r13d             ;odejmuje od policzonej szerokosci w bajtach
 	add r9, r11                ;i przesuwam wskaznik z malego obrazka
 	xor r13, r13               ;licznik pixeli w wierszu od poczatku
 
